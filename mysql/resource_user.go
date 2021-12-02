@@ -63,6 +63,13 @@ func resourceUser() *schema.Resource {
 				ForceNew: true,
 				Default:  "NONE",
 			},
+
+			"expire": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -107,6 +114,14 @@ func CreateUser(d *schema.ResourceData, meta interface{}) error {
 		stmtSQL = stmtSQL + authStm
 	} else {
 		stmtSQL = stmtSQL + fmt.Sprintf(" IDENTIFIED BY '%s'", password)
+	}
+
+	var expire bool
+	if e, ok := d.GetOk("expire"); ok {
+		expire = e.(bool)
+	}
+	if expire {
+		stmtSQL = stmtSQL + fmt.Sprintf(" PASSWORD EXPIRE")
 	}
 
 	requiredVersion, _ := version.NewVersion("5.7.0")
